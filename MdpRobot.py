@@ -29,6 +29,8 @@ class MdpRobot:
                     next_state = ss.State(i, j, k)
                     prob = self.transition_prob(error_prob, current_state, action, next_state)
                     if prob != 0:
+                        print(prob)
+                        print(next_state.get_state())
                         if prob == error_prob:
                             next_states_error.append(next_state)
                         else:
@@ -51,6 +53,7 @@ class MdpRobot:
         pos_x, pos_y, heading = current_state.get_state()
 
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, heading, action):
+            #print(next_state.get_state())
             return 1 - (2 * error_prob)
 
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading + 1) % 12, action):
@@ -58,6 +61,8 @@ class MdpRobot:
 
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading - 1) % 12, action):
             return error_prob
+
+        return 0
 
     # Returns what the next state would be given an action without any error.
     def next_logical_state(self, pos_x, pos_y, heading, action):
