@@ -15,22 +15,30 @@ class MdpRobot:
         self.state = ss.State()
         self.length = length
         self.width = width
-        self.state_space_size = length*width*num_headings
+        self.state_space_size = length*width*self.num_headings
 
     # Returns the next state given current state, action, and error prob
     # For part 1(d)
     def calc_next_state(self, error_prob, current_state, action):
 
-        possible_states = {}
-        for i in np.arange(length):
-            for j in np.arange(width):
-                for k in np.arange(num_headings):
+        next_states_error = []
+        
+        for i in np.arange(self.length):
+            for j in np.arange(self.width):
+                for k in np.arange(self.num_headings):
                     next_state = ss.State(i, j, k)
-                    prob = transition_prob(error_prob, current_state, action, next_state)
+                    prob = self.transition_prob(error_prob, current_state, action, next_state)
                     if prob != 0:
-                        possible_states[next_state] = prob
+                        if prob == error_prob:
+                            next_states_error.append(next_state)
+                        else:
+                            next_state_no_error = next_state
 
-        return random.choice(possible_states.keys(), possible_states.values())
+        chance = random.random()
+        if chance < 2*error_prob:
+            return random.choice(next_states_error)
+        else:
+            return next_state_no_error
 
 
     # Returns the probability of the next state given current state, action, and error probability
@@ -42,13 +50,13 @@ class MdpRobot:
 
         pos_x, pos_y, heading = current_state.get_state()
 
-        if next_state.get_state() == calc_next_state(pos_x, pos_y, heading, action):
+        if next_state.get_state() == self.next_logical_state(pos_x, pos_y, heading, action):
             return 1 - (2 * error_prob)
 
-        if next_state.get_state() == calc_next_state(pos_x, pos_y, (heading + 1) % 12, action):
+        if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading + 1) % 12, action):
             return error_prob
 
-        if next_state.get_state() == calc_next_state(pos_x, pos_y, (heading - 1) % 12, action):
+        if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading - 1) % 12, action):
             return error_prob
 
     # Returns what the next state would be given an action without any error.
@@ -58,14 +66,18 @@ class MdpRobot:
         if heading in self.right:
             # Move right if forwards, left if backwards
             next_x = pos_x + move
+            next_y = pos_y
         elif heading in self.down :
             # Move down if forwards, up if backwards
+            next_x = pos_x
             next_y = pos_y - move
         elif heading in self.left:
             # Move left if forwards, right if backwards
             next_x = pos_x - move
+            next_y = pos_y
         else:
             # Move up if forwards, down if backwards
+            next_x = pos_x
             next_y = pos_y + move
 
         # Check for bound violation
