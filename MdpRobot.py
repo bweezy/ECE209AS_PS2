@@ -186,4 +186,25 @@ class MdpRobot:
 
         return new_value
 
+    def one_step_lookahead(self, value):
+
+        new_policy = [[[None for h in xrange(self.num_headings)] for x in xrange(self.width)] for y in xrange(self.length)]
+        for state in self.states:
+            possible_states = self.state_space.get_adjacent_states(state)
+            max_action_value = float("-inf")
+            best_action = None
+            for action in action.action_space:
+                for next_state in possible_states:
+                    action_value = self.transition_prob(0, state, action, next_state)
+                    if action_value > max_action_value:
+                        max_action_value = action_value
+                        best_action = action
+
+
+            x, y, h = state.get_state()
+            new_policy[h][x][y] = action
+        return new_policy
+
+        
+
     
