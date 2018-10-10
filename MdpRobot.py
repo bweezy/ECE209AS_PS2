@@ -133,7 +133,7 @@ class MdpRobot:
             trajectory.append((pos_x,pos_y))
             curr_state = next_state
 
-        print trajectory
+        print(trajectory)
         plt.xlim(-1, 6)
         plt.ylim(-1, 6)
         for i in xrange(len(trajectory)-1):
