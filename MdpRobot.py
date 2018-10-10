@@ -155,12 +155,9 @@ class MdpRobot:
         last_value = np.zeros((self.num_headings, self.width, self.length))
 
         error_prob = 0
-
-        tol = 1e-10
-
         diff = -1
         
-        while np.abs(diff) > tol:
+        while diff != 0:
 
             new_value = np.zeros((self.num_headings, self.width, self.length))
 
@@ -180,7 +177,7 @@ class MdpRobot:
 
                     new_value[current_h][current_x][current_y] += prob * (reward + discount * v_last)
 
-            diff = np.sum(new_value - last_value)
+            diff = np.sum(np.abs(new_value - last_value))
             last_value = new_value
             print diff
 
