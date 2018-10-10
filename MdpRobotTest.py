@@ -3,8 +3,6 @@ import action
 import policy
 import state
 
-
-
 robot = MdpRobot.MdpRobot(6,6)
 
 move_forward = action.Action(1, 0)
@@ -29,5 +27,10 @@ move_forward = action.Action(1, 0)
 initial_policy = policy.Policy()
 initial_state = state.State(1,4,6)
 
-robot.plot_trajectory(initial_policy, initial_state, 0)
+#robot.plot_trajectory(initial_policy, initial_state, 0)
+
+#prob 3(d)
+value = robot.eval_policy(initial_policy, .9)
+
+print value
 

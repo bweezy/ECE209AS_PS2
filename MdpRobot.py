@@ -1,6 +1,7 @@
 import numpy as np
 import random
-import state as ss
+import state
+import state_space as ss
 import matplotlib.pyplot as plt
 # import action
 
@@ -13,7 +14,8 @@ class MdpRobot:
     num_headings = 12
 
     def __init__(self, length, width):
-        self.state = ss.State()
+        self.state = state.State()
+        self.state_space = ss.StateSpace(length, width)
         self.length = length
         self.width = width
         self.state_space_size = length*width*self.num_headings
@@ -27,7 +29,7 @@ class MdpRobot:
         for i in np.arange(self.length):
             for j in np.arange(self.width):
                 for k in np.arange(self.num_headings):
-                    next_state = ss.State(i, j, k)
+                    next_state = state.State(i, j, k)
                     prob = self.transition_prob(error_prob, current_state, action, next_state)
                     if prob != 0:
                         # print(prob)
@@ -100,13 +102,10 @@ class MdpRobot:
     # Returns the reward R(s)
     # For part 2
     def get_reward(self, current_state):
-        # L = W = 6 for this problem
-        L = 6
-        W = 6
 
         pos_x, pos_y, __ = current_state.get_state() # get the current state's x and y
 
-        if pos_x == 0 or pos_x == L-1 or pos_y == 0 or pos_y == W-1:
+        if pos_x == 0 or pos_x == self.length-1 or pos_y == 0 or pos_y == self.width-1:
             reward = -100
         elif (pos_x == 2 or pos_x == 4) and (pos_y >= 2 and pos_y <= 4):
             reward = -1
@@ -151,5 +150,36 @@ class MdpRobot:
         plt.show()
 
 
+    def eval_policy(self, policy, discount):
+
+        last_value = np.zeros((self.num_headings, self.width, self.length))
+
+        error_prob = 0
+
+        diff = -1
+        
+        while diff != 0:
+
+            new_value = np.zeros((self.num_headings, self.width, self.length))
+
+            for current_state in self.state_space.states:
+                current_x, current_y, current_h = current_state.get_state()
+                for next_state in self.state_space.states:
+
+                    action = policy.get_policy_action(current_state)
+                    # Need an error probability?
+                    prob = self.transition_prob(error_prob, current_state, action, next_state)
+                    reward = self.get_reward(current_state)
+
+                    next_x, next_y, next_h = next_state.get_state()
+                    v_last = last_value[next_h][next_x][next_y]
+
+                    new_value[current_h][current_x][current_y] += prob * (reward + discount * v_last)
+
+            diff = np.sum(new_value - last_value)
+            last_value = new_value
+            print diff
+
+        return new_value
 
     
