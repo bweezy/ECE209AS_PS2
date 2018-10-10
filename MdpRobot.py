@@ -1,7 +1,8 @@
 import numpy as np
 import random
 import state as ss
-import action
+import matplotlib.pyplot as plt
+# import action
 
 class MdpRobot:
 
@@ -29,8 +30,8 @@ class MdpRobot:
                     next_state = ss.State(i, j, k)
                     prob = self.transition_prob(error_prob, current_state, action, next_state)
                     if prob != 0:
-                        print(prob)
-                        print(next_state.get_state())
+                        # print(prob)
+                        # print(next_state.get_state())
                         if prob == error_prob:
                             next_states_error.append(next_state)
                         else:
@@ -95,6 +96,60 @@ class MdpRobot:
         next_heading = (heading + rotate) % 12
 
         return (next_x, next_y, next_heading)
+
+    # Returns the reward R(s)
+    # For part 2
+    def get_reward(self, current_state):
+        # L = W = 6 for this problem
+        L = 6
+        W = 6
+
+        pos_x, pos_y, __ = current_state.get_state() # get the current state's x and y
+
+        if pos_x == 0 or pos_x == L-1 or pos_y == 0 or pos_y == W-1:
+            reward = -100
+        elif (pos_x == 2 or pos_x == 4) and (pos_y >= 2 and pos_y <= 4):
+            reward = -1
+        elif pos_x == 3 and pos_y == 4:
+            reward = 1
+        else:
+            reward = 0
+
+        return reward
+
+    # generate and plot trajectory of robot given pi, s0, and pe.
+    # for part 3(b)
+    def plot_trajectory(self, policy, initial_state, error_prob):
+        trajectory = []
+
+        curr_state = initial_state
+        pos_x, pos_y, __ = curr_state.get_state()
+        trajectory.append((pos_x,pos_y))
+
+        while pos_x != 3 or pos_y != 4: # while the current state is not in the goal
+            action = policy.get_policy_action(curr_state)
+            next_state = self.calc_next_state(error_prob, curr_state, action) # get the next state
+            pos_x, pos_y, __ = next_state.get_state()
+            trajectory.append((pos_x,pos_y))
+            curr_state = next_state
+
+        print trajectory
+        plt.xlim(-1, 6)
+        plt.ylim(-1, 6)
+        for i in xrange(len(trajectory)-1):
+            curr_x = trajectory[i][0]
+            curr_y = trajectory[i][1]
+            next_x = trajectory[i+1][0]
+            next_y = trajectory[i+1][1]
+            dx = next_x - curr_x
+            dy = next_y - curr_y
+            plt.arrow(curr_x, curr_y, dx, dy, head_width=0.1, head_length=0.2, fc='r', ec='r', length_includes_head=True)
+
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Trajectory')
+        plt.show()
+
 
 
     
