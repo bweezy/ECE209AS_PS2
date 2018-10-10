@@ -31,6 +31,10 @@ class Policy:
                 else: # if the current state is above the goal
                     move = -1 # move backward
 
+                if x == 3 and y == 4:
+                    rotate = 0
+                    move = 0
+
                 a = action.Action(move,rotate)
 
                 policy_matrix_up[x][y] = a
@@ -49,6 +53,10 @@ class Policy:
                     move = 1 # move forward
                 else: # if the current state is above the goal
                     move = -1 # move backward
+
+                if x == 3 and y == 4:
+                    rotate = 0
+                    move = 0
 
                 a = action.Action(move,rotate)
 
@@ -69,6 +77,10 @@ class Policy:
                 else: # if the current state is above the goal
                     move = -1 # move backward
 
+                if x == 3 and y == 4:
+                    rotate = 0
+                    move = 0
+
                 a = action.Action(move,rotate)
 
                 policy_matrix_down[x][y] = a
@@ -87,6 +99,10 @@ class Policy:
                     move = 1 # move forward
                 else: # if the current state is above the goal
                     move = -1 # move backward
+
+                if x == 3 and y == 4:
+                    rotate = 0
+                    move = 0
 
                 a = action.Action(move,rotate)
 
