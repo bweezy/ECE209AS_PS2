@@ -32,5 +32,3 @@ initial_state = state.State(1,4,6)
 #prob 3(d)
 value = robot.eval_policy(initial_policy, .9)
 
-print value
-

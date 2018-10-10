@@ -156,15 +156,19 @@ class MdpRobot:
 
         error_prob = 0
 
+        tol = 1e-10
+
         diff = -1
         
-        while diff != 0:
+        while np.abs(diff) > tol:
 
             new_value = np.zeros((self.num_headings, self.width, self.length))
 
             for current_state in self.state_space.states:
                 current_x, current_y, current_h = current_state.get_state()
-                for next_state in self.state_space.states:
+                possible_states = self.state_space.get_adjacent_states(current_state)
+
+                for next_state in possible_states:
 
                     action = policy.get_policy_action(current_state)
                     # Need an error probability?
