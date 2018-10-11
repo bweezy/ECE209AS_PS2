@@ -3,7 +3,8 @@ import random
 import state
 import state_space as ss
 import matplotlib.pyplot as plt
-import action
+import action as ac
+import policy as pol
 
 class MdpRobot:
 
@@ -159,6 +160,8 @@ class MdpRobot:
         diff = -1
         
         while diff != 0:
+        # diff = 10000 # TEMPORARY: For debugging
+        # while diff > 100: # TEMPORARY: For debugging
 
             new_value = np.zeros((self.num_headings, self.width, self.length))
 
@@ -187,12 +190,13 @@ class MdpRobot:
     # for part 3(f)
     def one_step_lookahead(self, value):
 
-        new_policy = [[[None for h in xrange(self.num_headings)] for x in xrange(self.width)] for y in xrange(self.length)]
+        new_policy_matrix = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
         for state in self.state_space.states:
             possible_states = self.state_space.get_adjacent_states(state)
             max_action_value = float("-inf")
             best_action = None
-            for action in action.action_space:
+            for action_tuple in ac.action_space:
+                action = ac.Action(action_tuple[0],action_tuple[1])
                 for next_state in possible_states:
                     action_value = self.transition_prob(0, state, action, next_state)
                     if action_value > max_action_value:
@@ -201,7 +205,8 @@ class MdpRobot:
 
 
             x, y, h = state.get_state()
-            new_policy[h][x][y] = action
+            new_policy_matrix[h][x][y] = action
+            new_policy = pol.Policy(new_policy_matrix)
         return new_policy
 
     # for part 3(g)
@@ -211,12 +216,13 @@ class MdpRobot:
         last_policy = self.one_step_lookahead(last_value)
 
         while True:
+            print '\npolicy iteration'
             new_value = self.eval_policy(last_policy, discount)
             new_policy = self.one_step_lookahead(new_value)
 
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
 
-            if new_value == last_value and new_policy == last_policy:
+            if np.array_equal(new_value, last_value) and new_policy == last_policy:
                 break
 
         return new_policy, new_value # optimal policy and value

@@ -3,6 +3,7 @@ import action
 import policy
 import state
 import time
+import pickle
 
 robot = MdpRobot.MdpRobot(6,6)
 
@@ -28,9 +29,7 @@ move_forward = action.Action(1, 0)
 initial_policy = policy.Policy()
 initial_state = state.State(1,4,6)
 
-# import pdb; pdb.set_trace()
-
-robot.plot_trajectory(initial_policy, initial_state, 0)
+# robot.plot_trajectory(initial_policy, initial_state, 0)
 
 #prob 3(d)
 discount_factor = 0.9
@@ -50,6 +49,8 @@ discount_factor = 0.9
 # prob 3(h) and (i)
 start_time = time.time()
 opt_policy, opt_value = robot.policy_iteration(initial_policy, discount_factor)
+pickle.dump(opt_policy, open("opt_policy.p", "wb"))
+pickle.dump(opt_value, open("opt_value.p", "wb"))
 robot.plot_trajectory(opt_policy, initial_state, 0)
 end_time = time.time()
 
