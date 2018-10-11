@@ -2,6 +2,7 @@ import MdpRobot
 import action
 import policy
 import state
+import time
 
 robot = MdpRobot.MdpRobot(6,6)
 
@@ -27,13 +28,32 @@ move_forward = action.Action(1, 0)
 initial_policy = policy.Policy()
 initial_state = state.State(1,4,6)
 
-#robot.plot_trajectory(initial_policy, initial_state, 0)
+# import pdb; pdb.set_trace()
+
+robot.plot_trajectory(initial_policy, initial_state, 0)
 
 #prob 3(d)
-value = robot.eval_policy(initial_policy, .9)
+discount_factor = 0.9
+# value = robot.eval_policy(initial_policy, discount_factor)
 
-print(value)
+# print(value)
 
-#prob 3(e)
-print(value[6][4][1])
+# #prob 3(e)
+# print(value[6][4][1])
+
+# print value
+
+# # prob 3(e)
+# x, y, heading = initial_state.get_state()
+# print value[heading][x][y]
+
+# prob 3(h) and (i)
+start_time = time.time()
+opt_policy, opt_value = robot.policy_iteration(initial_policy, discount_factor)
+robot.plot_trajectory(opt_policy, initial_state, 0)
+end_time = time.time()
+
+elapsed_time = end_time - start_time
+
+import pdb; pdb.set_trace()
 
