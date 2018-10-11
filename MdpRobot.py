@@ -183,7 +183,7 @@ class MdpRobot:
 
             diff = np.sum(np.abs(new_value - last_value))
             last_value = new_value
-            print diff
+            # print diff
 
         return new_value
 
@@ -197,16 +197,18 @@ class MdpRobot:
             best_action = None
             for action_tuple in ac.action_space:
                 action = ac.Action(action_tuple[0],action_tuple[1])
+                action_value = 0
                 for next_state in possible_states:
-                    action_value = self.transition_prob(0, state, action, next_state)
-                    if action_value > max_action_value:
-                        max_action_value = action_value
-                        best_action = action
-
+                    x, y, h = next_state.get_state()
+                    action_value += self.transition_prob(0, state, action, next_state) * value[h][x][y] # add all Psa(s')V(s')
+                if action_value > max_action_value:
+                    max_action_value = action_value
+                    best_action = action
 
             x, y, h = state.get_state()
-            new_policy_matrix[h][x][y] = action
-            new_policy = pol.Policy(new_policy_matrix)
+            new_policy_matrix[h][x][y] = best_action
+
+        new_policy = pol.Policy(new_policy_matrix)
         return new_policy
 
     # for part 3(g)
@@ -220,10 +222,14 @@ class MdpRobot:
             new_value = self.eval_policy(last_policy, discount)
             new_policy = self.one_step_lookahead(new_value)
 
-            # import pdb; pdb.set_trace()
+            print np.sum(np.abs(new_value - last_value))
 
-            if np.array_equal(new_value, last_value) and new_policy == last_policy:
+            if np.array_equal(new_value, last_value): # if new_value = last_value, then new_policy = last_policy
+                import pdb; pdb.set_trace()
                 break
+
+            last_value = new_value
+            last_policy = new_policy
 
         return new_policy, new_value # optimal policy and value
 
