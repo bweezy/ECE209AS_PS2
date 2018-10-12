@@ -1,6 +1,6 @@
 import state
 import numpy as np
-
+import action
 
 class StateSpace:
 
@@ -26,7 +26,7 @@ class StateSpace:
     def calc_adjacent_states(self, state_in):
 
         pos_x, pos_y, heading = state_in.get_state()
-
+       
         possible_headings = [heading, (heading + 1) % 12, (heading - 1) % 12, (heading - 2) % 12, (heading + 2) % 12]
         possible_x = [pos_x]
         possible_y = [pos_y]
@@ -48,6 +48,7 @@ class StateSpace:
                     adjacent_states.append(state.State(x, y, h))
 
         return adjacent_states
+        
 
 
     def get_adjacent_states(self, state_in):

@@ -225,7 +225,7 @@ class MdpRobot:
             print np.sum(np.abs(new_value - last_value))
 
             if np.array_equal(new_value, last_value): # if new_value = last_value, then new_policy = last_policy
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
                 break
 
             last_value = new_value
@@ -233,7 +233,37 @@ class MdpRobot:
 
         return new_policy, new_value # optimal policy and value
 
+    def value_iteration(self, discount):
 
+        last_value = np.zeros((self.num_headings, self.width, self.length))
+        new_policy_matrix = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
+
+        error_prob = 0
+        diff = -1
         
+        while diff != 0:
+            new_value = np.zeros((self.num_headings, self.width, self.length))
+            for current_state in self.state_space.states:
+                current_x, current_y, current_h = current_state.get_state()
+                possible_states = self.state_space.get_adjacent_states(current_state)
+                best_action = None
+                max_action_value = float("-inf")
+                for action_tuple in ac.action_space: 
+                    action = ac.Action(action_tuple[0],action_tuple[1])
+                    action_value = 0
+                    for next_state in possible_states:
+                        x,y,h = next_state.get_state()
+                        action_value += self.transition_prob(error_prob, current_state, action, next_state) * (self.get_reward(current_state) + discount*last_value[h][x][y])
+                    if action_value > max_action_value:
+                        best_action = action 
+                        max_action_value = action_value
 
-    
+                new_policy_matrix[current_h][current_x][current_y] = best_action
+                new_value[current_h][current_x][current_y] = max_action_value
+
+            print np.sum(np.abs(new_value - last_value))
+            if np.array_equal(new_value, last_value):
+                break
+            last_value = new_value
+        new_policy = pol.Policy(new_policy_matrix)
+        return new_policy
