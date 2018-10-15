@@ -109,8 +109,24 @@ class MdpRobot:
         if pos_x == 0 or pos_x == self.length-1 or pos_y == 0 or pos_y == self.width-1:
             reward = -100
         elif (pos_x == 2 or pos_x == 4) and (pos_y >= 2 and pos_y <= 4):
-            reward = -1
+            reward = -10
         elif pos_x == 3 and pos_y == 4:
+            reward = 1
+        else:
+            reward = 0
+
+        return reward
+
+    # For part 5(b)
+    def get_reward_prob5(self, current_state):
+
+        pos_x, pos_y, heading = current_state.get_state() # get the current state's x and y
+
+        if pos_x == 0 or pos_x == self.length-1 or pos_y == 0 or pos_y == self.width-1:
+            reward = -100
+        elif (pos_x == 2 or pos_x == 4) and (pos_y >= 2 and pos_y <= 4):
+            reward = -10
+        elif pos_x == 3 and pos_y == 4 and (heading == 5 or heading == 6 or heading == 7) :
             reward = 1
         else:
             reward = 0
@@ -128,6 +144,40 @@ class MdpRobot:
 
         while pos_x != 3 or pos_y != 4: # while the current state is not in the goal
             action = policy.get_policy_action(curr_state)
+            # import pdb; pdb.set_trace()
+            next_state = self.calc_next_state(error_prob, curr_state, action) # get the next state
+            pos_x, pos_y, __ = next_state.get_state()
+            trajectory.append((pos_x,pos_y))
+            curr_state = next_state
+
+        print(trajectory)
+        plt.xlim(-1, 6)
+        plt.ylim(-1, 6)
+        for i in xrange(len(trajectory)-1):
+            curr_x = trajectory[i][0]
+            curr_y = trajectory[i][1]
+            next_x = trajectory[i+1][0]
+            next_y = trajectory[i+1][1]
+            dx = next_x - curr_x
+            dy = next_y - curr_y
+            plt.arrow(curr_x, curr_y, dx, dy, head_width=0.1, head_length=0.2, fc='r', ec='r', length_includes_head=True)
+
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Trajectory')
+        plt.show()
+
+    # for part 5(b)
+    def plot_trajectory_prob5b(self, policy, initial_state, error_prob):
+        trajectory = []
+
+        curr_state = initial_state
+        pos_x, pos_y, heading = curr_state.get_state()
+        trajectory.append((pos_x,pos_y))
+
+        while pos_x != 3 or pos_y != 4 and (heading < 5 or heading > 7) : # while the current state is not in the goal
+            action = policy.get_policy_action(curr_state)
+            import pdb; pdb.set_trace()
             next_state = self.calc_next_state(error_prob, curr_state, action) # get the next state
             pos_x, pos_y, __ = next_state.get_state()
             trajectory.append((pos_x,pos_y))
@@ -152,11 +202,10 @@ class MdpRobot:
 
 
     # for part 3(d)
-    def eval_policy(self, policy, discount):
+    def eval_policy(self, policy, discount, error_prob=0):
 
         last_value = np.zeros((self.num_headings, self.width, self.length))
 
-        error_prob = 0
         diff = -1
         
         while diff != 0:
@@ -188,7 +237,7 @@ class MdpRobot:
         return new_value
 
     # for part 3(f)
-    def one_step_lookahead(self, value):
+    def one_step_lookahead(self, value, error_prob=0):
 
         new_policy_matrix = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
         for state in self.state_space.states:
@@ -200,7 +249,7 @@ class MdpRobot:
                 action_value = 0
                 for next_state in possible_states:
                     x, y, h = next_state.get_state()
-                    action_value += self.transition_prob(0, state, action, next_state) * value[h][x][y] # add all Psa(s')V(s')
+                    action_value += self.transition_prob(error_prob, state, action, next_state) * value[h][x][y] # add all Psa(s')V(s')
                 if action_value > max_action_value:
                     max_action_value = action_value
                     best_action = action
@@ -212,15 +261,15 @@ class MdpRobot:
         return new_policy
 
     # for part 3(g)
-    def policy_iteration(self, initial_policy, discount):
+    def policy_iteration(self, initial_policy, discount, error_prob=0):
 
-        last_value = self.eval_policy(initial_policy, discount)
-        last_policy = self.one_step_lookahead(last_value)
+        last_value = self.eval_policy(initial_policy, discount, error_prob)
+        last_policy = self.one_step_lookahead(last_value, error_prob)
 
         while True:
             print '\npolicy iteration'
-            new_value = self.eval_policy(last_policy, discount)
-            new_policy = self.one_step_lookahead(new_value)
+            new_value = self.eval_policy(last_policy, discount, error_prob)
+            new_policy = self.one_step_lookahead(new_value, error_prob)
 
             print np.sum(np.abs(new_value - last_value))
 
@@ -233,12 +282,11 @@ class MdpRobot:
 
         return new_policy, new_value # optimal policy and value
 
-    def value_iteration(self, discount):
+    def value_iteration(self, discount, error_prob=0):
 
         last_value = np.zeros((self.num_headings, self.width, self.length))
         new_policy_matrix = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
 
-        error_prob = 0
         diff = -1
         
         while diff != 0:
@@ -266,4 +314,40 @@ class MdpRobot:
                 break
             last_value = new_value
         new_policy = pol.Policy(new_policy_matrix)
-        return new_policy
+        return new_policy, new_value
+
+
+    # slightly modified for prob 5(b)
+    def value_iteration_prob5(self, discount, error_prob=0):
+
+        last_value = np.zeros((self.num_headings, self.width, self.length))
+        new_policy_matrix = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
+
+        diff = -1
+        
+        while diff != 0:
+            new_value = np.zeros((self.num_headings, self.width, self.length))
+            for current_state in self.state_space.states:
+                current_x, current_y, current_h = current_state.get_state()
+                possible_states = self.state_space.get_adjacent_states(current_state)
+                best_action = None
+                max_action_value = float("-inf")
+                for action_tuple in ac.action_space: 
+                    action = ac.Action(action_tuple[0],action_tuple[1])
+                    action_value = 0
+                    for next_state in possible_states:
+                        x,y,h = next_state.get_state()
+                        action_value += self.transition_prob(error_prob, current_state, action, next_state) * (self.get_reward_prob5(current_state) + discount*last_value[h][x][y])
+                    if action_value > max_action_value:
+                        best_action = action 
+                        max_action_value = action_value
+
+                new_policy_matrix[current_h][current_x][current_y] = best_action
+                new_value[current_h][current_x][current_y] = max_action_value
+
+            print np.sum(np.abs(new_value - last_value))
+            if np.array_equal(new_value, last_value):
+                break
+            last_value = new_value
+        new_policy = pol.Policy(new_policy_matrix)
+        return new_policy, new_value
