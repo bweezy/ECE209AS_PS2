@@ -11,16 +11,17 @@ class StateSpace:
         self.length = length
         self.width = width
 
-        for x in np.arange(length):
-            for y in np.arange(width):
+        for x in np.arange(width):
+            for y in np.arange(length):
                 for h in np.arange(self.num_headings):
                     state_list.append(state.State(x, y, h))
 
         self.states = set(state_list)
-        self.adjacent_states = {}
+        self.adjacent_states = [[[None for y in xrange(self.length)] for x in xrange(self.width)] for h in xrange(self.num_headings)]
 
         for s in self.states:
-            self.adjacent_states[s] = self.calc_adjacent_states(s)
+            x, y, h = s.get_state()
+            self.adjacent_states[h][x][y] = self.calc_adjacent_states(s)
 
     
     def calc_adjacent_states(self, state_in):
@@ -52,4 +53,5 @@ class StateSpace:
 
 
     def get_adjacent_states(self, state_in):
-        return self.adjacent_states[state_in]
+        x, y, h = state_in.get_state()
+        return self.adjacent_states[h][x][y]

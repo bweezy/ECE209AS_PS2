@@ -41,14 +41,14 @@ discount_factor = 0.9
 # robot.plot_trajectory(opt_policy_prob3, initial_state, 0)
 
 # prob 4(b) and 4(c)
-# start_time = time.time()
-# opt_policy_prob4, opt_value_prob4 = robot.value_iteration(discount_factor)
+#start_time = time.time()
+#opt_policy_prob4, opt_value_prob4 = robot.value_iteration(discount_factor)
 # pickle.dump(opt_policy_prob4, open("opt_policy_prob4.p", "wb"))
 # pickle.dump(opt_value_prob4, open("opt_value_prob4.p", "wb"))
-# end_time = time.time()
-# elapsed_time = end_time - start_time
-# print "4(c): ", elapsed_time, "seconds"
-# robot.plot_trajectory(opt_policy_prob4, initial_state, 0)
+#end_time = time.time()
+#elapsed_time = end_time - start_time
+#print "4(c): ", elapsed_time, "seconds"
+#robot.plot_trajectory(opt_policy_prob4, initial_state, 0)
 
 # prob 5(a)
 # robot.plot_trajectory(initial_policy, initial_state, 0.25)
@@ -56,10 +56,12 @@ error_prob = 0.25
 opt_policy_prob5a, opt_value_prob5a = robot.value_iteration(discount_factor, error_prob)
 pickle.dump(opt_policy_prob5a, open("opt_policy_prob5a.p", "wb"))
 pickle.dump(opt_value_prob5a, open("opt_value_prob5a.p", "wb"))
-# opt_policy_prob5a = pickle.load(open("opt_policy_prob5a.p", "rb"))
-# opt_value_prob5a = pickle.load(open("opt_value_prob5a.p", "rb"))
+#opt_policy_prob5a = pickle.load(open("opt_policy_prob5a.p", "rb"))
+#opt_value_prob5a = pickle.load(open("opt_value_prob5a.p", "rb"))
 robot.plot_trajectory(opt_policy_prob5a, initial_state, error_prob)
 
+
+'''
 # prob 5(b)
 error_prob = 0
 opt_policy_prob5b_0, opt_value_prob5b_0 = robot.value_iteration_prob5b(discount_factor, error_prob)
@@ -76,4 +78,5 @@ pickle.dump(opt_value_prob5b_25, open("opt_value_prob5b_25.p", "wb"))
 # opt_policy_prob5b_25 = pickle.load(open("opt_policy_prob5b_25.p", "rb"))
 # opt_value_prob5b_25 = pickle.load(open("opt_value_prob5b_25.p", "rb"))
 robot.plot_trajectory(opt_policy_prob5b_25, initial_state, error_prob)
+'''
 import pdb; pdb.set_trace()

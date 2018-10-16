@@ -25,26 +25,21 @@ class MdpRobot:
     # For part 1(d)
     def calc_next_state(self, error_prob, current_state, action):
 
-        next_states_error = []
-        
-        for i in np.arange(self.length):
-            for j in np.arange(self.width):
-                for k in np.arange(self.num_headings):
-                    next_state = state.State(i, j, k)
-                    prob = self.transition_prob(error_prob, current_state, action, next_state)
-                    if prob != 0:
-                        # print(prob)
-                        # print(next_state.get_state())
-                        if prob == error_prob:
-                            next_states_error.append(next_state)
-                        else:
-                            next_state_no_error = next_state
+        next_states = []
+        next_states_prob = []
 
-        chance = random.random()
-        if chance < 2*error_prob:
-            return random.choice(next_states_error)
-        else:
-            return next_state_no_error
+        #print current_state.get_state()
+        possible_states = self.state_space.get_adjacent_states(current_state)
+
+        for next_possible_state in possible_states:
+            prob = self.transition_prob(error_prob, current_state, action, next_possible_state)
+            if prob != 0:
+                next_states.append(next_possible_state)
+                next_states_prob.append(prob)
+
+
+        next_state = np.random.choice(next_states, p=next_states_prob)
+        return next_state
 
 
     # Returns the probability of the next state given current state, action, and error probability
@@ -56,17 +51,19 @@ class MdpRobot:
 
         pos_x, pos_y, heading = current_state.get_state()
 
+        probability = 0
+
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, heading, action):
             #print(next_state.get_state())
-            return 1 - (2 * error_prob)
+            probability += 1 - (2 * error_prob)
 
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading + 1) % 12, action):
-            return error_prob
+            probability += error_prob
 
         if next_state.get_state() == self.next_logical_state(pos_x, pos_y, (heading - 1) % 12, action):
-            return error_prob
+            probability += error_prob
 
-        return 0
+        return probability
 
     # Returns what the next state would be given an action without any error.
     def next_logical_state(self, pos_x, pos_y, heading, action):
@@ -149,6 +146,7 @@ class MdpRobot:
             pos_x, pos_y, __ = next_state.get_state()
             trajectory.append((pos_x,pos_y))
             curr_state = next_state
+            #print curr_state.get_state()
 
         print(trajectory)
         plt.xlim(-1, 6)
