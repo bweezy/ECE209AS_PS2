@@ -1,3 +1,5 @@
+action_space = [(-1, -1), (-1, 0), (-1, 1), (0, 0), (1, -1), (1, 0), (1, 1)]
+
 class Action:
 
     # Move can be {-1, 0, 1}, where -1 is backwards, 0 is nothing, and 1 is forwards
